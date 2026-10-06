@@ -37,7 +37,7 @@ footer{color:var(--muted);font-size:12px;margin-top:18px;line-height:1.45}
 </main>
 <script>
 const STARTER=[{"en":"Brown Pelican","sci":"Pelecanus occidentalis"},{"en":"N tak","sci":"Casual migrant"},{"en":"Magnificent Frigatebird","sci":"Fregata magnificens"},{"en":"Red-billed Tropicbird","sci":"Phaethon aethereus"},{"en":"Masked Booby","sci":"Sula dactylacra"},{"en":"Nazca Booby","sci":"Sula granti"},{"en":"Brown Booby","sci":"Sula leucogaster"},{"en":"Blue-footed Booby","sci":"Sule neborei"},{"en":"Red-footed Booby","sci":"Sula suta"},{"en":"Wilson's Storm-Petrel","sci":"Oceanites oceanicus"},{"en":"Leach’s Storm-Petrel","sci":"Oceanodroma leucorhoa"},{"en":"Band-rumped Storm-Petrel","sci":"Oceanodromna castro"},{"en":"Wedge-rumped Storm-Petrel","sci":"Oceanodroma rethys"},{"en":"Least Storm-Petrel","sci":"Occanodroma microsoma"},{"en":"Pink-footed Shearwater","sci":"Puffinus ereatopu"},{"en":"Wedge-tailed Shearwater","sci":"Puffinus pacificus"},{"en":"Galapagos Shearwater","sci":"Puffinus subalaris"},{"en":"Pomarine Jaeger","sci":"Stercorarius pomarinus"},{"en":"Parasitic Jaeger","sci":"Stercorarius parasiticus"},{"en":"South Polar Skua","sci":"Stercorarius maccormick"},{"en":"Laughing Gull","sci":"Leucophacus atric"},{"en":"Franklin's Gull","sci":"Leucophacuspipixea ie"},{"en":"Ring-billed Gull","sci":"Larus delawarens"},{"en":"Sabine's Gull","sci":"Xema sabi"},{"en":"Gull-billed Tern","sci":"Gelocelidon ni"},{"en":"Sandwich Tem","sci":"Thalaseus sandvi"},{"en":"Faidy common from","sci":"March to"},{"en":"Sept to mid-Nov and from","sci":"April to"},{"en":"Binds of Cota","sci":"Rice me"},{"en":"American Oystercatcher","sci":"Hacmatopus pall"},{"en":"Rufescent Tiger-Heron","sci":"Tigrisoma linea"},{"en":"Bare-throated Tiger-Heron","sci":"Tigrisoma mexican"},{"en":"Fasciated Tiger-Heron","sci":"Tigrisoma fase"},{"en":"Pinnated Bittern","sci":"Botaurus pin"},{"en":"Reddish Egret","sci":"Egretta rufis"},{"en":"Striated Heron","sci":"Butorides str"},{"en":"Tricolored Heron","sci":"Egretta tri"},{"en":"Blue Heron","sci":"Egret cae"},{"en":"Blue Heron","sci":"Ardea he"},{"en":"Yellow-crowned Night-Heron","sci":"Nyctanassa viol"},{"en":"Boat-billed Heron","sci":"Cochlearins cochlea"},{"en":"Double-striped Thick-knee","sci":"Burhinus bist"},{"en":"Featedess on both CR species","sci":"They often"},{"en":"Southern Lapwing","sci":"Vanellu sisi"},{"en":"Black-bellied Plover","sci":"Phuvialis sg"},{"en":"American Golden-Plover","sci":"Plus domin"},{"en":"Collared Plover","sci":"Charadrius ca"},{"en":"Wilson's Plover","sci":"Charadrius wil"},{"en":"American Avocet","sci":"Recierviresira amerie"},{"en":"Black-necked stilt","sci":"Himantopus mesic"},{"en":"Solitary Sandpiper","sci":"Tringa soli"},{"en":"Buff-breasted Sandpiper","sci":"Calidris subi"},{"en":"Pact cas fom mid-Sepe co late","sci":"Oct an"},{"en":"Semipalmated Sandpiper","sci":"Calis pi"},{"en":"Pectoral Sandpiper","sci":"Calidris mela"},{"en":"White-rumped Sandpiper","sci":"Calidri fis"},{"en":"Long-billed Dowitcher","sci":"Limmodromus so"},{"en":"Wilson's Snipe","sci":"Gallinago del"},{"en":"Wilson's Phalarope","sci":"Phalarogus tia"},{"en":"Red-necked Phalarope","sci":"Phalaropus lob"},{"en":"Ces le","sci":"Aina la"},{"en":"American Coot","sci":"Fulica ame"},{"en":"Bind of Cone","sci":"Rica aaah"},{"en":"Ocellated Crake","sci":"Micropygia schombugh"},{"en":"White-throated Crake","sci":"Laterallas albigulanly"},{"en":"Gray-breasted Crake","sci":"Lateralus evil"},{"en":"Yellow-breasted Crake","sci":"Porzana flavivent"},{"en":"Rufous-necked Wood-Rail","sci":"Aramides axial"},{"en":"Gray-necked Wood-Rail","sci":"Aramides cajenl"},{"en":"Lesser Yellow-headed Vulture","sci":"Cathartes burroviaii"},{"en":"Harris's Hawk","sci":"Parabuteo unicinii"},{"en":"Black-collared Hawk","sci":"Busarellus nigr"},{"en":"Swallow-tailed Kite","sci":"Elanoides forficas"},{"en":"White-tailed Kite","sci":"Elanus lewcun"},{"en":"Mississippi Kite","sci":"Ietinia mississipp"},{"en":"Plumbeous Kite","sci":"Tetinia ph"},{"en":"Sharp-shinned Hawk","sci":"Accipiter sri"},{"en":"Bicolored Hawk","sci":"Accipiter bi"},{"en":"Cooper's Hawk","sci":"Accipiter cod"},{"en":"Gray-bellied Hawk","sci":"Accipiter poliogg"},{"en":"Highland Tinamou","sci":"Nothocercus bonapartei"},{"en":"Great Tinamou","sci":"Tinamus major"},{"en":"Little Tinamou","sci":"Crypturellus soui"},{"en":"Thicket Tinamou","sci":"Crypturellus cinnamomeus"},{"en":"Slaty-breasted Tinamou","sci":"Crypturellus boucardi"},{"en":"Resplendent Quetzal","sci":"Pharomachrus mocinno"},{"en":"Keel-billed Toucan","sci":"Ramphastos sulfuratus"},{"en":"Clay-colored Thrush","sci":"Turdus grayi"}];
-const LISTKEY="crbirds_official_v1", SEENKEY="crbirds_seen_v1";
+const LISTKEY="crbirds_official_v2", SEENKEY="crbirds_seen_v1";
 let birds=[], filter="all";
 let seen=new Set(JSON.parse(localStorage.getItem(SEENKEY)||"[]"));
 const $=s=>document.querySelector(s);
@@ -57,26 +57,45 @@ const cached=JSON.parse(localStorage.getItem(LISTKEY)||"null");
 if(cached && cached.length===944){setBirds(cached,"Saved AOCR checklist • 944 species");$("#status").textContent="Ready • works offline";$("#notice").hidden=true}
 else {setBirds(STARTER,"Starter list");$("#status").textContent="Starter list loaded • syncing official list…";syncOfficial()}
 
-function cleanCell(s){return (s||"").replace(/\s+/g," ").trim()}
-function looksScientific(s){return /^[A-Z][a-zA-Z-]+(?:\s+| )[a-z][a-zA-Z.-]+(?:\s+[a-z][a-zA-Z.-]+)?$/.test(cleanCell(s))}
+function cleanCell(s){return (s||"").replace(/\u00a0/g," ").replace(/\s+/g," ").trim()}
+function validStatus(s){
+  s=cleanCell(s);
+  return s==="" || /^(?:R|RR|M|A|\?|SC|END)(?:[\s,?/-]*(?:R|RR|M|A|\?|SC|END))*$/i.test(s);
+}
+function addParts(out,parts){
+  parts=parts.map(cleanCell);
+  if(parts.length<3) return;
+  const sci=parts[0], en=parts[1], status=parts[3]||"";
+  if(!sci || !en || sci.length>90 || en.length>100) return;
+  // AOCR includes an undescribed form, so do not require a Latin binomial here.
+  if(validStatus(status)) out.push({sci,en});
+}
 function parseOfficialHTML(html){
  const doc=new DOMParser().parseFromString(html,"text/html");
  const out=[];
+
+ // WordPress may render the checklist as table rows, paragraphs, or line breaks.
  doc.querySelectorAll("tr").forEach(tr=>{
-   const c=[...tr.querySelectorAll("th,td")].map(x=>cleanCell(x.textContent));
-   if(c.length>=2 && looksScientific(c[0]) && c[1]) out.push({sci:c[0],en:c[1]});
+   const cells=[...tr.querySelectorAll("th,td")].map(x=>cleanCell(x.textContent));
+   if(cells.length>=3) addParts(out,cells);
  });
- doc.querySelectorAll("p,li,div").forEach(el=>{
-   const line=cleanCell(el.textContent);
-   const parts=line.split(/\s*\|\s*/);
-   if(parts.length>=2 && looksScientific(parts[0]) && parts[1]) out.push({sci:parts[0],en:parts[1]});
+ doc.querySelectorAll("p,li").forEach(el=>{
+   const t=cleanCell(el.textContent);
+   if(t.includes("|")) addParts(out,t.split(/\s*\|\s*/));
  });
- const text=doc.body.innerText||doc.body.textContent||"";
+
+ // Preserve block boundaries before stripping markup, then parse every pipe row.
+ let marked=html
+   .replace(/<br\s*\/?>/gi,"\n")
+   .replace(/<\/(?:p|li|tr|div|h[1-6])>/gi,"\n");
+ const tmp=new DOMParser().parseFromString(marked,"text/html");
+ const text=tmp.body.textContent||"";
  text.split(/\n+/).forEach(raw=>{
-   const parts=cleanCell(raw).split(/\s*\|\s*/);
-   if(parts.length>=2 && looksScientific(parts[0]) && parts[1]) out.push({sci:parts[0],en:parts[1]});
+   const t=cleanCell(raw);
+   if(t.includes("|")) addParts(out,t.split(/\s*\|\s*/));
  });
- return [...new Map(out.map(x=>[x.sci,x])).values()];
+
+ return [...new Map(out.map(x=>[x.sci+"|||"+x.en,x])).values()];
 }
 function officialCallback(payload){
  try{
@@ -91,9 +110,10 @@ function officialCallback(payload){
   $("#notice").hidden=true;
  }catch(e){
   console.error("AOCR import:",e);
-  $("#status").textContent="Starter list ready • official sync incomplete";
+  const m=String(e.message||e).match(/parsed \d+/);
+  $("#status").textContent=m ? ("Official import incomplete • "+m[0]) : "Official sync incomplete";
   $("#notice").hidden=false;
-  $("#notice").textContent="Could not import all 944 species yet. Reload while online to try again.";
+  $("#notice").textContent="The official checklist did not validate at exactly 944 species. "+(m?m[0]+". ":"")+"No Seen marks were changed.";
  }
 }
 function syncOfficial(){
@@ -102,7 +122,7 @@ function syncOfficial(){
  const s=document.createElement("script");
  s.id="aocr-sync";
  s.src="https://public-api.wordpress.com/wp/v2/sites/listaoficialavesdecostarica.wordpress.com/pages?slug=lista-oficial-online&_jsonp=officialCallback&_="+Date.now();
- s.onerror=()=>{$("#status").textContent="Starter list ready • official sync unavailable";$("#notice").hidden=false};
+ s.onerror=()=>{$("#status").textContent="Official sync unavailable";$("#notice").hidden=false;$("#notice").textContent="Could not reach the AOCR checklist. No Seen marks were changed."};
  document.head.appendChild(s);
 }
 if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
