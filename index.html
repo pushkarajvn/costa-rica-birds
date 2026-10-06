@@ -12,7 +12,7 @@
 <style>
 :root{--bg:#f4f2e9;--card:#fff;--ink:#17231b;--muted:#657068;--green:#173f2b;--line:#d9ddd8}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-header{position:sticky;top:0;z-index:5;background:var(--green);color:white;padding:calc(14px + env(safe-area-inset-top)) 16px 14px}
+header{position:sticky;top:0;z-index:5;background:var(--green);color:white;padding:calc(14px + env(safe-area-inset-top)) 16px 14px}.headrow{display:flex;align-items:center;justify-content:space-between;gap:12px}.lang{background:#ffffff20;color:white;border:1px solid #ffffff55;padding:8px 11px}
 h1{font-size:22px;margin:0 0 4px} #status{font-size:13px;opacity:.85}
 main{max-width:760px;margin:auto;padding:14px 14px calc(40px + env(safe-area-inset-bottom))}
 .progress{display:flex;justify-content:space-between;align-items:end;margin:4px 2px 12px} #count{font-size:28px;font-weight:800} .small{font-size:12px;color:var(--muted)}
@@ -38,23 +38,24 @@ footer{color:var(--muted);font-size:12px;margin-top:18px;line-height:1.45}
 </style>
 </head>
 <body>
-<header><h1>Costa Rica Birds</h1><div id="status">Opening checklist…</div></header>
+<header><div class="headrow"><h1 id="title">Costa Rica Birds</h1><button class="lang" id="langBtn" type="button">Español</button></div><div id="status">Opening checklist…</div></header>
 <main>
 <div class="notice" id="notice">First online launch: the app will try to synchronize the current AOCR official checklist and save it on this iPhone. After that, the saved checklist and your Seen marks can be used offline.</div>
-<div class="progress"><div><div id="count">0 / 0</div><div class="small">species seen</div></div><div class="small" id="source"></div></div>
+<div class="progress"><div><div id="count">0 / 0</div><div class="small" id="seenLabel">species seen</div></div><div class="small" id="source"></div></div>
 <input id="q" type="search" placeholder="Search English or scientific name" autocomplete="off">
 <div class="tabs"><button class="on" data-f="all">All</button><button data-f="unseen">Not seen</button><button data-f="seen">Seen</button></div>
 <div id="list"></div>
-<footer>Checklist source: Asociación Ornitológica de Costa Rica (AOCR), official online list. The bundled starter list is derived from the field guide supplied for this project and is used only if the first synchronization is unavailable. No field-guide illustrations or descriptive text are redistributed.</footer>
+<footer id="footerText">Checklist source: Asociación Ornitológica de Costa Rica (AOCR), official online list. The bundled starter list is derived from the field guide supplied for this project and is used only if the first synchronization is unavailable. No field-guide illustrations or descriptive text are redistributed.</footer>
 </main>
 <div id="photoModal" aria-hidden="true"><div class="photoCard"><div class="photoInfo"><button class="closePhoto" aria-label="Close">×</button><div class="en" id="photoEn"></div><div class="sci" id="photoSci"></div></div><img id="photoLarge" alt=""><div class="photoInfo"><a class="photoSource" id="photoSource" target="_blank" rel="noopener">Photo source and licensing: Wikipedia / Wikimedia Commons</a></div></div></div>
 <script>
 const STARTER=[{"en":"Brown Pelican","sci":"Pelecanus occidentalis"},{"en":"N tak","sci":"Casual migrant"},{"en":"Magnificent Frigatebird","sci":"Fregata magnificens"},{"en":"Red-billed Tropicbird","sci":"Phaethon aethereus"},{"en":"Masked Booby","sci":"Sula dactylacra"},{"en":"Nazca Booby","sci":"Sula granti"},{"en":"Brown Booby","sci":"Sula leucogaster"},{"en":"Blue-footed Booby","sci":"Sule neborei"},{"en":"Red-footed Booby","sci":"Sula suta"},{"en":"Wilson's Storm-Petrel","sci":"Oceanites oceanicus"},{"en":"Leach’s Storm-Petrel","sci":"Oceanodroma leucorhoa"},{"en":"Band-rumped Storm-Petrel","sci":"Oceanodromna castro"},{"en":"Wedge-rumped Storm-Petrel","sci":"Oceanodroma rethys"},{"en":"Least Storm-Petrel","sci":"Occanodroma microsoma"},{"en":"Pink-footed Shearwater","sci":"Puffinus ereatopu"},{"en":"Wedge-tailed Shearwater","sci":"Puffinus pacificus"},{"en":"Galapagos Shearwater","sci":"Puffinus subalaris"},{"en":"Pomarine Jaeger","sci":"Stercorarius pomarinus"},{"en":"Parasitic Jaeger","sci":"Stercorarius parasiticus"},{"en":"South Polar Skua","sci":"Stercorarius maccormick"},{"en":"Laughing Gull","sci":"Leucophacus atric"},{"en":"Franklin's Gull","sci":"Leucophacuspipixea ie"},{"en":"Ring-billed Gull","sci":"Larus delawarens"},{"en":"Sabine's Gull","sci":"Xema sabi"},{"en":"Gull-billed Tern","sci":"Gelocelidon ni"},{"en":"Sandwich Tem","sci":"Thalaseus sandvi"},{"en":"Faidy common from","sci":"March to"},{"en":"Sept to mid-Nov and from","sci":"April to"},{"en":"Binds of Cota","sci":"Rice me"},{"en":"American Oystercatcher","sci":"Hacmatopus pall"},{"en":"Rufescent Tiger-Heron","sci":"Tigrisoma linea"},{"en":"Bare-throated Tiger-Heron","sci":"Tigrisoma mexican"},{"en":"Fasciated Tiger-Heron","sci":"Tigrisoma fase"},{"en":"Pinnated Bittern","sci":"Botaurus pin"},{"en":"Reddish Egret","sci":"Egretta rufis"},{"en":"Striated Heron","sci":"Butorides str"},{"en":"Tricolored Heron","sci":"Egretta tri"},{"en":"Blue Heron","sci":"Egret cae"},{"en":"Blue Heron","sci":"Ardea he"},{"en":"Yellow-crowned Night-Heron","sci":"Nyctanassa viol"},{"en":"Boat-billed Heron","sci":"Cochlearins cochlea"},{"en":"Double-striped Thick-knee","sci":"Burhinus bist"},{"en":"Featedess on both CR species","sci":"They often"},{"en":"Southern Lapwing","sci":"Vanellu sisi"},{"en":"Black-bellied Plover","sci":"Phuvialis sg"},{"en":"American Golden-Plover","sci":"Plus domin"},{"en":"Collared Plover","sci":"Charadrius ca"},{"en":"Wilson's Plover","sci":"Charadrius wil"},{"en":"American Avocet","sci":"Recierviresira amerie"},{"en":"Black-necked stilt","sci":"Himantopus mesic"},{"en":"Solitary Sandpiper","sci":"Tringa soli"},{"en":"Buff-breasted Sandpiper","sci":"Calidris subi"},{"en":"Pact cas fom mid-Sepe co late","sci":"Oct an"},{"en":"Semipalmated Sandpiper","sci":"Calis pi"},{"en":"Pectoral Sandpiper","sci":"Calidris mela"},{"en":"White-rumped Sandpiper","sci":"Calidri fis"},{"en":"Long-billed Dowitcher","sci":"Limmodromus so"},{"en":"Wilson's Snipe","sci":"Gallinago del"},{"en":"Wilson's Phalarope","sci":"Phalarogus tia"},{"en":"Red-necked Phalarope","sci":"Phalaropus lob"},{"en":"Ces le","sci":"Aina la"},{"en":"American Coot","sci":"Fulica ame"},{"en":"Bind of Cone","sci":"Rica aaah"},{"en":"Ocellated Crake","sci":"Micropygia schombugh"},{"en":"White-throated Crake","sci":"Laterallas albigulanly"},{"en":"Gray-breasted Crake","sci":"Lateralus evil"},{"en":"Yellow-breasted Crake","sci":"Porzana flavivent"},{"en":"Rufous-necked Wood-Rail","sci":"Aramides axial"},{"en":"Gray-necked Wood-Rail","sci":"Aramides cajenl"},{"en":"Lesser Yellow-headed Vulture","sci":"Cathartes burroviaii"},{"en":"Harris's Hawk","sci":"Parabuteo unicinii"},{"en":"Black-collared Hawk","sci":"Busarellus nigr"},{"en":"Swallow-tailed Kite","sci":"Elanoides forficas"},{"en":"White-tailed Kite","sci":"Elanus lewcun"},{"en":"Mississippi Kite","sci":"Ietinia mississipp"},{"en":"Plumbeous Kite","sci":"Tetinia ph"},{"en":"Sharp-shinned Hawk","sci":"Accipiter sri"},{"en":"Bicolored Hawk","sci":"Accipiter bi"},{"en":"Cooper's Hawk","sci":"Accipiter cod"},{"en":"Gray-bellied Hawk","sci":"Accipiter poliogg"},{"en":"Highland Tinamou","sci":"Nothocercus bonapartei"},{"en":"Great Tinamou","sci":"Tinamus major"},{"en":"Little Tinamou","sci":"Crypturellus soui"},{"en":"Thicket Tinamou","sci":"Crypturellus cinnamomeus"},{"en":"Slaty-breasted Tinamou","sci":"Crypturellus boucardi"},{"en":"Resplendent Quetzal","sci":"Pharomachrus mocinno"},{"en":"Keel-billed Toucan","sci":"Ramphastos sulfuratus"},{"en":"Clay-colored Thrush","sci":"Turdus grayi"}];
-const LISTKEY="crbirds_official_v3", SEENKEY="crbirds_seen_v1";
+const LISTKEY="crbirds_official_v4", OLD_LISTKEY="crbirds_official_v3", SEENKEY="crbirds_seen_v1", LANGKEY="crbirds_lang_v1";
+let lang=localStorage.getItem(LANGKEY)||"en";
 let birds=[], filter="all";
 let seen=new Set(JSON.parse(localStorage.getItem(SEENKEY)||"[]"));
 const $=s=>document.querySelector(s);
-function normalizeBird(x){return {en:(x.en||"").trim(),sci:(x.sci||"").trim()}}
+function normalizeBird(x){return {en:(x.en||"").trim(),sci:(x.sci||"").trim(),es:(x.es||"").trim(),local:(x.local||"").trim()}}
 function setBirds(a,label){birds=a.map(normalizeBird).filter(x=>x.en&&x.sci); $("#source").textContent=label; render()}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 const PHOTO_KEY="crbirds_photo_cache_v1";
@@ -101,11 +102,30 @@ function openPhoto(el){
  $("#photoModal").setAttribute("aria-hidden","false");
 }
 function closePhoto(){$("#photoModal").classList.remove("open");$("#photoModal").setAttribute("aria-hidden","true");$("#photoLarge").src=""}
+const UI={
+ en:{title:"Costa Rica Birds",switch:"Español",search:"Search English, Spanish, local or scientific name",all:"All",unseen:"Not seen",seen:"Seen",seenLabel:"species seen",ready:"Ready • works offline",source:"Saved AOCR checklist • 944 species",photo:"Photo source and licensing: Wikipedia / Wikimedia Commons"},
+ es:{title:"Aves de Costa Rica",switch:"English",search:"Buscar por nombre español, inglés, local o científico",all:"Todas",unseen:"No vistas",seen:"Vistas",seenLabel:"especies vistas",ready:"Lista lista • funciona sin conexión",source:"Lista AOCR guardada • 944 especies",photo:"Fuente y licencia de la foto: Wikipedia / Wikimedia Commons"}
+};
+function applyLanguage(){
+ const u=UI[lang];
+ document.documentElement.lang=lang;
+ $("#title").textContent=u.title; $("#langBtn").textContent=u.switch;
+ $("#q").placeholder=u.search; $("#seenLabel").textContent=u.seenLabel;
+ const bs=document.querySelectorAll(".tabs button");
+ bs[0].textContent=u.all; bs[1].textContent=u.unseen; bs[2].textContent=u.seen;
+ $("#photoSource").textContent=u.photo;
+ const foot=$("#footerText");
+ foot.textContent=lang==="es"
+   ?"Fuente de la lista: Asociación Ornitológica de Costa Rica (AOCR), Lista Oficial. Los nombres en español y nombres comunes de Costa Rica provienen de la lista oficial de AOCR. Las fotos se consultan por nombre científico."
+   :"Checklist source: Asociación Ornitológica de Costa Rica (AOCR), official list. Spanish and Costa Rican common names come from the AOCR official list. Photos are looked up by scientific name.";
+ render();
+}
+$("#langBtn").addEventListener("click",()=>{lang=lang==="en"?"es":"en";localStorage.setItem(LANGKEY,lang);applyLanguage()});
 function render(){
  const q=$("#q").value.trim().toLowerCase();
- const rows=birds.filter(b=>{const id=b.sci; const match=!q||(b.en+" "+b.sci).toLowerCase().includes(q); return match&&(filter==="all"||(filter==="seen"&&seen.has(id))||(filter==="unseen"&&!seen.has(id))) });
+ const rows=birds.filter(b=>{const id=b.sci; const match=!q||(b.en+" "+b.es+" "+b.local+" "+b.sci).toLowerCase().includes(q); return match&&(filter==="all"||(filter==="seen"&&seen.has(id))||(filter==="unseen"&&!seen.has(id))) });
  $("#count").textContent=`${[...seen].filter(x=>birds.some(b=>b.sci===x)).length} / ${birds.length}`;
- $("#list").innerHTML=rows.map(b=>`<div class="bird ${seen.has(b.sci)?"seen":""}" data-id="${esc(b.sci)}"><span class="photo placeholder" role="img" aria-label="Load photo of ${esc(b.en)}" data-sci="${esc(b.sci)}" data-en="${esc(b.en)}"></span><div class="tick">${seen.has(b.sci)?"✓":""}</div><div class="names"><div class="en">${esc(b.en)}</div><div class="sci">${esc(b.sci)}</div></div></div>`).join("");
+ $("#list").innerHTML=rows.map(b=>{const main=lang==="es"?(b.es||b.en):b.en; const second=lang==="es"&&b.local?`<div class="small">${esc(b.local)}</div>`:""; return `<div class="bird ${seen.has(b.sci)?"seen":""}" data-id="${esc(b.sci)}"><span class="photo placeholder" role="img" aria-label="${esc(main)}" data-sci="${esc(b.sci)}" data-en="${esc(main)}"></span><div class="tick">${seen.has(b.sci)?"✓":""}</div><div class="names"><div class="en">${esc(main)}</div>${second}<div class="sci">${esc(b.sci)}</div></div></div>`}).join("");
  observePhotos();
 }
 $("#q").addEventListener("input",render);
@@ -115,18 +135,24 @@ $(".closePhoto").onclick=closePhoto;
 $("#photoModal").onclick=e=>{if(e.target.id==="photoModal")closePhoto()};
 
 const cached=JSON.parse(localStorage.getItem(LISTKEY)||"null");
-if(cached && cached.length===944){setBirds(cached,"Saved AOCR checklist • 944 species");$("#status").textContent="Ready • works offline";$("#notice").hidden=true}
-else {setBirds(STARTER,"Starter list");$("#status").textContent="Starter list loaded • syncing official list…";syncOfficial()}
+const oldCached=JSON.parse(localStorage.getItem(OLD_LISTKEY)||"null");
+if(cached && cached.length===944){
+ setBirds(cached,UI[lang].source);$("#status").textContent=UI[lang].ready;$("#notice").hidden=true;applyLanguage()
+}else if(oldCached && oldCached.length===944){
+ setBirds(oldCached,"AOCR • 944 species");$("#status").textContent=lang==="es"?"Añadiendo nombres oficiales en español…":"Adding official Spanish names…";$("#notice").hidden=true;applyLanguage();syncOfficial()
+}else {setBirds(STARTER,"Starter list");$("#status").textContent="Starter list loaded • syncing official list…";applyLanguage();syncOfficial()}
 
 function cleanCell(s){return (s||"").replace(/\u00a0/g," ").replace(/\s+/g," ").trim()}
 function validStatus(s){ return true }
 function addParts(out,parts){
   parts=parts.map(cleanCell);
   if(parts.length<3) return;
-  const sci=parts[0], en=parts[1], status=parts[3]||"";
-  if(!sci || !en || sci.length>90 || en.length>100) return;
-  // AOCR species rows have four pipe-separated fields. Status punctuation varies.
-  out.push({sci,en});
+  const sci=parts[0], en=parts[1], esField=parts[2]||"", status=parts[3]||"";
+  if(!sci || !en || !esField || sci.length>90 || en.length>100 || esField.length>240) return;
+  // AOCR format: official Spanish name followed by Costa Rican common names in parentheses.
+  const m=esField.match(/^([^()]+?)(?:\s*\((.*)\))?$/);
+  const es=cleanCell(m?m[1]:esField), local=cleanCell(m&&m[2]?m[2]:"");
+  out.push({sci,en,es,local});
 }
 function parseOfficialHTML(html){
  const doc=new DOMParser().parseFromString(html,"text/html");
@@ -163,8 +189,9 @@ function officialCallback(payload){
   const uniq=parseOfficialHTML(rendered);
   if(uniq.length!==944) throw Error("Expected 944, parsed "+uniq.length);
   localStorage.setItem(LISTKEY,JSON.stringify(uniq));
-  setBirds(uniq,"AOCR June 2026 • 944 species");
-  $("#status").textContent="Ready • official 944-species list saved offline";
+  setBirds(uniq,lang==="es"?"AOCR junio 2026 • 944 especies":"AOCR June 2026 • 944 species");
+  $("#status").textContent=lang==="es"?"Lista lista • 944 especies guardadas":"Ready • official 944-species list saved offline";
+  applyLanguage();
   $("#notice").hidden=true;
  }catch(e){
   console.error("AOCR import:",e);
