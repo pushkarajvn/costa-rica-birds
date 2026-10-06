@@ -23,6 +23,18 @@ button.on{background:var(--green);color:white} .bird{display:flex;align-items:ce
 .bird.seen .tick{background:var(--green);border-color:var(--green);color:white} .names{min-width:0;flex:1} .en{font-weight:750} .sci{font-style:italic;color:var(--muted);font-size:13px;margin-top:2px}
 .notice{background:#fff8d9;border:1px solid #eadb92;padding:10px 12px;border-radius:12px;font-size:13px;margin-bottom:10px}
 footer{color:var(--muted);font-size:12px;margin-top:18px;line-height:1.45}
+
+.photo{width:64px;height:64px;border-radius:11px;object-fit:cover;flex:0 0 64px;background:#e8ece8;cursor:pointer}
+.photo.placeholder{display:grid;place-items:center;font-size:25px;color:#6d766f}
+.photo.placeholder::after{content:"🐦"}
+#photoModal{position:fixed;inset:0;background:#000b;z-index:20;display:none;align-items:center;justify-content:center;padding:18px}
+#photoModal.open{display:flex}
+.photoCard{background:var(--card);width:min(520px,100%);border-radius:18px;overflow:hidden;box-shadow:0 12px 40px #0006}
+.photoCard img{display:block;width:100%;max-height:65vh;object-fit:contain;background:#111}
+.photoInfo{padding:13px 15px}
+.photoInfo .en{font-size:18px}
+.photoSource{display:inline-block;margin-top:8px;color:var(--green);font-size:13px}
+.closePhoto{float:right;border:0;background:#eee;border-radius:999px;width:34px;height:34px;font-size:20px}
 </style>
 </head>
 <body>
@@ -35,6 +47,7 @@ footer{color:var(--muted);font-size:12px;margin-top:18px;line-height:1.45}
 <div id="list"></div>
 <footer>Checklist source: Asociación Ornitológica de Costa Rica (AOCR), official online list. The bundled starter list is derived from the field guide supplied for this project and is used only if the first synchronization is unavailable. No field-guide illustrations or descriptive text are redistributed.</footer>
 </main>
+<div id="photoModal" aria-hidden="true"><div class="photoCard"><div class="photoInfo"><button class="closePhoto" aria-label="Close">×</button><div class="en" id="photoEn"></div><div class="sci" id="photoSci"></div></div><img id="photoLarge" alt=""><div class="photoInfo"><a class="photoSource" id="photoSource" target="_blank" rel="noopener">Photo source and licensing: Wikipedia / Wikimedia Commons</a></div></div></div>
 <script>
 const STARTER=[{"en":"Brown Pelican","sci":"Pelecanus occidentalis"},{"en":"N tak","sci":"Casual migrant"},{"en":"Magnificent Frigatebird","sci":"Fregata magnificens"},{"en":"Red-billed Tropicbird","sci":"Phaethon aethereus"},{"en":"Masked Booby","sci":"Sula dactylacra"},{"en":"Nazca Booby","sci":"Sula granti"},{"en":"Brown Booby","sci":"Sula leucogaster"},{"en":"Blue-footed Booby","sci":"Sule neborei"},{"en":"Red-footed Booby","sci":"Sula suta"},{"en":"Wilson's Storm-Petrel","sci":"Oceanites oceanicus"},{"en":"Leach’s Storm-Petrel","sci":"Oceanodroma leucorhoa"},{"en":"Band-rumped Storm-Petrel","sci":"Oceanodromna castro"},{"en":"Wedge-rumped Storm-Petrel","sci":"Oceanodroma rethys"},{"en":"Least Storm-Petrel","sci":"Occanodroma microsoma"},{"en":"Pink-footed Shearwater","sci":"Puffinus ereatopu"},{"en":"Wedge-tailed Shearwater","sci":"Puffinus pacificus"},{"en":"Galapagos Shearwater","sci":"Puffinus subalaris"},{"en":"Pomarine Jaeger","sci":"Stercorarius pomarinus"},{"en":"Parasitic Jaeger","sci":"Stercorarius parasiticus"},{"en":"South Polar Skua","sci":"Stercorarius maccormick"},{"en":"Laughing Gull","sci":"Leucophacus atric"},{"en":"Franklin's Gull","sci":"Leucophacuspipixea ie"},{"en":"Ring-billed Gull","sci":"Larus delawarens"},{"en":"Sabine's Gull","sci":"Xema sabi"},{"en":"Gull-billed Tern","sci":"Gelocelidon ni"},{"en":"Sandwich Tem","sci":"Thalaseus sandvi"},{"en":"Faidy common from","sci":"March to"},{"en":"Sept to mid-Nov and from","sci":"April to"},{"en":"Binds of Cota","sci":"Rice me"},{"en":"American Oystercatcher","sci":"Hacmatopus pall"},{"en":"Rufescent Tiger-Heron","sci":"Tigrisoma linea"},{"en":"Bare-throated Tiger-Heron","sci":"Tigrisoma mexican"},{"en":"Fasciated Tiger-Heron","sci":"Tigrisoma fase"},{"en":"Pinnated Bittern","sci":"Botaurus pin"},{"en":"Reddish Egret","sci":"Egretta rufis"},{"en":"Striated Heron","sci":"Butorides str"},{"en":"Tricolored Heron","sci":"Egretta tri"},{"en":"Blue Heron","sci":"Egret cae"},{"en":"Blue Heron","sci":"Ardea he"},{"en":"Yellow-crowned Night-Heron","sci":"Nyctanassa viol"},{"en":"Boat-billed Heron","sci":"Cochlearins cochlea"},{"en":"Double-striped Thick-knee","sci":"Burhinus bist"},{"en":"Featedess on both CR species","sci":"They often"},{"en":"Southern Lapwing","sci":"Vanellu sisi"},{"en":"Black-bellied Plover","sci":"Phuvialis sg"},{"en":"American Golden-Plover","sci":"Plus domin"},{"en":"Collared Plover","sci":"Charadrius ca"},{"en":"Wilson's Plover","sci":"Charadrius wil"},{"en":"American Avocet","sci":"Recierviresira amerie"},{"en":"Black-necked stilt","sci":"Himantopus mesic"},{"en":"Solitary Sandpiper","sci":"Tringa soli"},{"en":"Buff-breasted Sandpiper","sci":"Calidris subi"},{"en":"Pact cas fom mid-Sepe co late","sci":"Oct an"},{"en":"Semipalmated Sandpiper","sci":"Calis pi"},{"en":"Pectoral Sandpiper","sci":"Calidris mela"},{"en":"White-rumped Sandpiper","sci":"Calidri fis"},{"en":"Long-billed Dowitcher","sci":"Limmodromus so"},{"en":"Wilson's Snipe","sci":"Gallinago del"},{"en":"Wilson's Phalarope","sci":"Phalarogus tia"},{"en":"Red-necked Phalarope","sci":"Phalaropus lob"},{"en":"Ces le","sci":"Aina la"},{"en":"American Coot","sci":"Fulica ame"},{"en":"Bind of Cone","sci":"Rica aaah"},{"en":"Ocellated Crake","sci":"Micropygia schombugh"},{"en":"White-throated Crake","sci":"Laterallas albigulanly"},{"en":"Gray-breasted Crake","sci":"Lateralus evil"},{"en":"Yellow-breasted Crake","sci":"Porzana flavivent"},{"en":"Rufous-necked Wood-Rail","sci":"Aramides axial"},{"en":"Gray-necked Wood-Rail","sci":"Aramides cajenl"},{"en":"Lesser Yellow-headed Vulture","sci":"Cathartes burroviaii"},{"en":"Harris's Hawk","sci":"Parabuteo unicinii"},{"en":"Black-collared Hawk","sci":"Busarellus nigr"},{"en":"Swallow-tailed Kite","sci":"Elanoides forficas"},{"en":"White-tailed Kite","sci":"Elanus lewcun"},{"en":"Mississippi Kite","sci":"Ietinia mississipp"},{"en":"Plumbeous Kite","sci":"Tetinia ph"},{"en":"Sharp-shinned Hawk","sci":"Accipiter sri"},{"en":"Bicolored Hawk","sci":"Accipiter bi"},{"en":"Cooper's Hawk","sci":"Accipiter cod"},{"en":"Gray-bellied Hawk","sci":"Accipiter poliogg"},{"en":"Highland Tinamou","sci":"Nothocercus bonapartei"},{"en":"Great Tinamou","sci":"Tinamus major"},{"en":"Little Tinamou","sci":"Crypturellus soui"},{"en":"Thicket Tinamou","sci":"Crypturellus cinnamomeus"},{"en":"Slaty-breasted Tinamou","sci":"Crypturellus boucardi"},{"en":"Resplendent Quetzal","sci":"Pharomachrus mocinno"},{"en":"Keel-billed Toucan","sci":"Ramphastos sulfuratus"},{"en":"Clay-colored Thrush","sci":"Turdus grayi"}];
 const LISTKEY="crbirds_official_v3", SEENKEY="crbirds_seen_v1";
@@ -43,15 +56,63 @@ let seen=new Set(JSON.parse(localStorage.getItem(SEENKEY)||"[]"));
 const $=s=>document.querySelector(s);
 function normalizeBird(x){return {en:(x.en||"").trim(),sci:(x.sci||"").trim()}}
 function setBirds(a,label){birds=a.map(normalizeBird).filter(x=>x.en&&x.sci); $("#source").textContent=label; render()}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+const PHOTO_KEY="crbirds_photo_cache_v1";
+let photoCache={}; try{photoCache=JSON.parse(localStorage.getItem(PHOTO_KEY)||"{}")}catch(e){}
+let photoObserver=null;
+async function findPhoto(sci){
+ if(photoCache[sci]) return photoCache[sci];
+ const u="https://en.wikipedia.org/w/api.php?action=query&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=500&format=json&origin=*&titles="+encodeURIComponent(sci);
+ try{
+   const r=await fetch(u); if(!r.ok) throw Error("photo lookup");
+   const j=await r.json(); const pg=Object.values((j.query&&j.query.pages)||{})[0];
+   const item=pg&&pg.thumbnail?{thumb:pg.thumbnail.source,page:"https://en.wikipedia.org/wiki/"+encodeURIComponent(pg.title.replaceAll(" ","_"))}:null;
+   photoCache[sci]=item||{none:true};
+   localStorage.setItem(PHOTO_KEY,JSON.stringify(photoCache));
+   return item;
+ }catch(e){return null}
+}
+function observePhotos(){
+ if(photoObserver) photoObserver.disconnect();
+ photoObserver=new IntersectionObserver(entries=>{
+   entries.forEach(async entry=>{
+     if(!entry.isIntersecting)return;
+     const el=entry.target; photoObserver.unobserve(el);
+     const item=await findPhoto(el.dataset.sci);
+     if(item&&item.thumb){
+       const img=document.createElement("img");
+       img.className="photo"; img.loading="lazy"; img.alt=el.dataset.en;
+       img.src=item.thumb; img.dataset.sci=el.dataset.sci; img.dataset.en=el.dataset.en;
+       img.dataset.page=item.page; el.replaceWith(img);
+     }
+   })
+ },{rootMargin:"250px 0px"});
+ document.querySelectorAll(".photo.placeholder").forEach(el=>photoObserver.observe(el));
+}
+function openPhoto(el){
+ const item=photoCache[el.dataset.sci];
+ if(!item||!item.thumb)return;
+ $("#photoEn").textContent=el.dataset.en;
+ $("#photoSci").textContent=el.dataset.sci;
+ $("#photoLarge").src=item.thumb;
+ $("#photoLarge").alt=el.dataset.en;
+ $("#photoSource").href=item.page;
+ $("#photoModal").classList.add("open");
+ $("#photoModal").setAttribute("aria-hidden","false");
+}
+function closePhoto(){$("#photoModal").classList.remove("open");$("#photoModal").setAttribute("aria-hidden","true");$("#photoLarge").src=""}
 function render(){
  const q=$("#q").value.trim().toLowerCase();
  const rows=birds.filter(b=>{const id=b.sci; const match=!q||(b.en+" "+b.sci).toLowerCase().includes(q); return match&&(filter==="all"||(filter==="seen"&&seen.has(id))||(filter==="unseen"&&!seen.has(id))) });
  $("#count").textContent=`${[...seen].filter(x=>birds.some(b=>b.sci===x)).length} / ${birds.length}`;
- $("#list").innerHTML=rows.map(b=>`<div class="bird ${seen.has(b.sci)?"seen":""}" data-id="${b.sci.replaceAll('"','&quot;')}"><div class="tick">${seen.has(b.sci)?"✓":""}</div><div class="names"><div class="en">${b.en}</div><div class="sci">${b.sci}</div></div></div>`).join("");
+ $("#list").innerHTML=rows.map(b=>`<div class="bird ${seen.has(b.sci)?"seen":""}" data-id="${esc(b.sci)}"><span class="photo placeholder" role="img" aria-label="Load photo of ${esc(b.en)}" data-sci="${esc(b.sci)}" data-en="${esc(b.en)}"></span><div class="tick">${seen.has(b.sci)?"✓":""}</div><div class="names"><div class="en">${esc(b.en)}</div><div class="sci">${esc(b.sci)}</div></div></div>`).join("");
+ observePhotos();
 }
 $("#q").addEventListener("input",render);
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("on"));b.classList.add("on");filter=b.dataset.f;render()});
-$("#list").onclick=e=>{const r=e.target.closest(".bird");if(!r)return; const id=r.dataset.id; seen.has(id)?seen.delete(id):seen.add(id);localStorage.setItem(SEENKEY,JSON.stringify([...seen]));render()};
+$("#list").onclick=e=>{const pic=e.target.closest("img.photo");if(pic){openPhoto(pic);return} const r=e.target.closest(".bird");if(!r)return; const id=r.dataset.id; seen.has(id)?seen.delete(id):seen.add(id);localStorage.setItem(SEENKEY,JSON.stringify([...seen]));render()};
+$(".closePhoto").onclick=closePhoto;
+$("#photoModal").onclick=e=>{if(e.target.id==="photoModal")closePhoto()};
 
 const cached=JSON.parse(localStorage.getItem(LISTKEY)||"null");
 if(cached && cached.length===944){setBirds(cached,"Saved AOCR checklist • 944 species");$("#status").textContent="Ready • works offline";$("#notice").hidden=true}
