@@ -41,6 +41,11 @@ footer{color:var(--muted);font-size:12px;margin-top:18px;line-height:1.45}
 <body>
 <header><div class="headrow"><h1 id="title">Costa Rica Birds</h1><button class="lang" id="langBtn" type="button">Español</button></div><div id="status">Opening checklist…</div></header>
 <main>
+
+<div id="offlineBar" style="margin:8px 0 12px;padding:10px 12px;border-radius:12px;background:#eef6ee;font-weight:700">
+  Offline readiness: checking…
+</div>
+
 <div class="notice" id="notice">First online launch: the app will try to synchronize the current AOCR official checklist and save it on this iPhone. After that, the saved checklist and your Seen marks can be used offline.</div>
 <div class="progress"><div><div id="count">0 / 0</div><div class="small" id="seenLabel">species seen</div></div><div class="small" id="source"></div></div>
 <input id="q" type="search" placeholder="Search English or scientific name" autocomplete="off">
@@ -212,5 +217,22 @@ function syncOfficial(){
  document.head.appendChild(s);
 }
 if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
+
+function updateOfflineBar(){
+ const b=document.getElementById("offlineBar"); if(!b) return;
+ let n=0;
+ try{ const a=JSON.parse(localStorage.getItem(LISTKEY)||"[]"); n=Array.isArray(a)?a.length:0 }catch(e){}
+ if(n===944){
+   b.textContent=(lang==="es"?"✓ Lista de 944 aves guardada para uso sin internet":"✓ 944-bird checklist saved for offline use");
+   b.style.background="#e6f4ea";
+ }else{
+   b.textContent=(lang==="es"?"Conéctate una vez para guardar la lista oficial de 944 aves":"Connect once to save the official 944-bird checklist");
+   b.style.background="#fff4d6";
+ }
+}
+window.addEventListener("online",updateOfflineBar);
+window.addEventListener("offline",updateOfflineBar);
+setTimeout(updateOfflineBar,300);
+
 </script>
 </body></html>
