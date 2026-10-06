@@ -54,33 +54,55 @@ document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.que
 $("#list").onclick=e=>{const r=e.target.closest(".bird");if(!r)return; const id=r.dataset.id; seen.has(id)?seen.delete(id):seen.add(id);localStorage.setItem(SEENKEY,JSON.stringify([...seen]));render()};
 
 const cached=JSON.parse(localStorage.getItem(LISTKEY)||"null");
-if(cached && cached.length>900){setBirds(cached,"Saved AOCR checklist");$("#status").textContent="Ready • works offline";$("#notice").hidden=true}
+if(cached && cached.length===944){setBirds(cached,"Saved AOCR checklist • 944 species");$("#status").textContent="Ready • works offline";$("#notice").hidden=true}
 else {setBirds(STARTER,"Starter list");$("#status").textContent="Starter list loaded • syncing official list…";syncOfficial()}
 
+function cleanCell(s){return (s||"").replace(/\s+/g," ").trim()}
+function looksScientific(s){return /^[A-Z][a-zA-Z-]+(?:\s+| )[a-z][a-zA-Z.-]+(?:\s+[a-z][a-zA-Z.-]+)?$/.test(cleanCell(s))}
+function parseOfficialHTML(html){
+ const doc=new DOMParser().parseFromString(html,"text/html");
+ const out=[];
+ doc.querySelectorAll("tr").forEach(tr=>{
+   const c=[...tr.querySelectorAll("th,td")].map(x=>cleanCell(x.textContent));
+   if(c.length>=2 && looksScientific(c[0]) && c[1]) out.push({sci:c[0],en:c[1]});
+ });
+ doc.querySelectorAll("p,li,div").forEach(el=>{
+   const line=cleanCell(el.textContent);
+   const parts=line.split(/\s*\|\s*/);
+   if(parts.length>=2 && looksScientific(parts[0]) && parts[1]) out.push({sci:parts[0],en:parts[1]});
+ });
+ const text=doc.body.innerText||doc.body.textContent||"";
+ text.split(/\n+/).forEach(raw=>{
+   const parts=cleanCell(raw).split(/\s*\|\s*/);
+   if(parts.length>=2 && looksScientific(parts[0]) && parts[1]) out.push({sci:parts[0],en:parts[1]});
+ });
+ return [...new Map(out.map(x=>[x.sci,x])).values()];
+}
 function officialCallback(payload){
  try{
-  const html=payload && payload[0] && payload[0].content && payload[0].content.rendered;
-  if(!html) throw Error("No content");
-  const doc=new DOMParser().parseFromString(html,"text/html");
-  const text=doc.body.innerText;
-  const lines=text.split(/\n+/).map(x=>x.trim()).filter(Boolean);
-  const out=[];
-  for(const line of lines){
-   const parts=line.split(/\s*\|\s*/);
-   if(parts.length>=3 && /^[A-Z][a-z]+\s+[a-z][a-z-]+/.test(parts[0])) out.push({sci:parts[0],en:parts[1]});
-  }
-  const uniq=[...new Map(out.map(x=>[x.sci,x])).values()];
-  if(uniq.length<900) throw Error("Incomplete parse "+uniq.length);
+  const page=Array.isArray(payload)?payload[0]:payload;
+  const rendered=page && page.content && (page.content.rendered||page.content);
+  if(!rendered) throw Error("No AOCR page content");
+  const uniq=parseOfficialHTML(rendered);
+  if(uniq.length!==944) throw Error("Expected 944, parsed "+uniq.length);
   localStorage.setItem(LISTKEY,JSON.stringify(uniq));
-  setBirds(uniq,"AOCR June 2026");
-  $("#status").textContent="Ready • official list saved for offline use";
+  setBirds(uniq,"AOCR June 2026 • 944 species");
+  $("#status").textContent="Ready • official 944-species list saved offline";
   $("#notice").hidden=true;
- }catch(e){$("#status").textContent="Starter list ready • official sync unavailable";}
+ }catch(e){
+  console.error("AOCR import:",e);
+  $("#status").textContent="Starter list ready • official sync incomplete";
+  $("#notice").hidden=false;
+  $("#notice").textContent="Could not import all 944 species yet. Reload while online to try again.";
+ }
 }
 function syncOfficial(){
+ const old=document.getElementById("aocr-sync");
+ if(old) old.remove();
  const s=document.createElement("script");
+ s.id="aocr-sync";
  s.src="https://public-api.wordpress.com/wp/v2/sites/listaoficialavesdecostarica.wordpress.com/pages?slug=lista-oficial-online&_jsonp=officialCallback&_="+Date.now();
- s.onerror=()=>$("#status").textContent="Starter list ready • official sync unavailable";
+ s.onerror=()=>{$("#status").textContent="Starter list ready • official sync unavailable";$("#notice").hidden=false};
  document.head.appendChild(s);
 }
 if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
